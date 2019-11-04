@@ -1,18 +1,27 @@
+#ifndef TIMERCPP_H
+#define TIMERCPP_H
+
 #include <iostream>
 #include <thread>
 #include <chrono>
 
 class Timer {
-    bool clear = false;
+    private:
+        bool clear = false;
 
     public:
-        void setTimeout(auto function, int delay);
-        void setInterval(auto function, int interval);
-        void stop();
+        Timer() : clear(false) {}
+        Timer(const Timer&) = delete;
+        ~Timer() { stop(); }
+
+        template <typename T> void setTimeout(T function, int delay);
+        template <typename T> void setInterval(T function, int interval);
+        inline void stop();
 
 };
 
-void Timer::setTimeout(auto function, int delay) {
+template <typename T>
+void Timer::setTimeout(T function, int delay) {
     this->clear = false;
     std::thread t([=]() {
         if(this->clear) return;
@@ -23,7 +32,8 @@ void Timer::setTimeout(auto function, int delay) {
     t.detach();
 }
 
-void Timer::setInterval(auto function, int interval) {
+template <typename T>
+void Timer::setInterval(T function, int interval) {
     this->clear = false;
     std::thread t([=]() {
         while(true) {
@@ -39,3 +49,5 @@ void Timer::setInterval(auto function, int interval) {
 void Timer::stop() {
     this->clear = true;
 }
+
+#endif // TIMERCPP_H
